@@ -1,6 +1,6 @@
 from boto.ec2.cloudwatch import CloudWatchConnection
 from datetime import datetime
-from main import AWS_CREDENTIALS, CLOUDWATCH_NAMESPACE
+from main import AWS_CREDENTIALS, CLOUDWATCH_NAMESPACE, HOSTNAME_DIMENSIONS
 
 # https://gist.github.com/zircote/7834009
 
@@ -23,50 +23,82 @@ def monitor(app):
         task = get_task(event)
         if task.name is None:
             return
-        dimensions = {
-            'hostname': task.hostname,
+        dimensions = []
+        if HOSTNAME_DIMENSIONS:
+            dimensions.append({
+                'hostname': task.hostname,
+                'task': task.name,
+            })
+        dimensions.append({
             'task': task.name,
-        }
+        })
         dtime = datetime.fromtimestamp(task.runtime)
-        cloudwatch.put_metric_data(CLOUDWATCH_NAMESPACE, task.type,
-                                   (dtime.second * 1000) + (dtime.microsecond / 1000),
-                                   datetime.fromtimestamp(task.timestamp), 'Milliseconds', dimensions)
+        for dimensions_metric in dimensions:
+            cloudwatch.put_metric_data(
+                CLOUDWATCH_NAMESPACE, task.type,
+                (dtime.second * 1000) + (dtime.microsecond / 1000),
+                datetime.fromtimestamp(task.timestamp),
+                'Milliseconds', dimensions_metric)
 
     def on_task_received(event):
         print('on_task_received', event)
         task = get_task(event)
         if task.name is None:
             return
-        dimensions = {
-            'hostname': task.hostname,
+        dimensions = []
+        if HOSTNAME_DIMENSIONS:
+            dimensions.append({
+                'hostname': task.hostname,
+                'task': task.name,
+            })
+        dimensions.append({
             'task': task.name,
-        }
-        cloudwatch.put_metric_data(CLOUDWATCH_NAMESPACE, task.type, 1,
-                                   datetime.fromtimestamp(task.timestamp), 'Count', dimensions)
+        })
+        for dimensions_metric in dimensions:
+            cloudwatch.put_metric_data(
+                CLOUDWATCH_NAMESPACE, task.type, 1,
+                datetime.fromtimestamp(task.timestamp),
+                'Count', dimensions_metric)
 
     def on_task_started(event):
         print('on_task_started', event)
         task = get_task(event)
         if task.name is None:
             return
-        dimensions = {
-            'hostname': task.hostname,
+        dimensions = []
+        if HOSTNAME_DIMENSIONS:
+            dimensions.append({
+                'hostname': task.hostname,
+                'task': task.name,
+            })
+        dimensions.append({
             'task': task.name,
-        }
-        cloudwatch.put_metric_data(CLOUDWATCH_NAMESPACE, task.type, 1,
-                                   datetime.fromtimestamp(task.timestamp), 'Count', dimensions)
+        })
+        for dimensions_metric in dimensions:
+            cloudwatch.put_metric_data(
+                CLOUDWATCH_NAMESPACE, task.type, 1,
+                datetime.fromtimestamp(task.timestamp),
+                'Count', dimensions_metric)
 
     def on_task_failed(event):
         print('on_task_failed', event)
         task = get_task(event)
         if task.name is None:
             return
-        dimensions = {
-            'hostname': task.hostname,
+        dimensions = []
+        if HOSTNAME_DIMENSIONS:
+            dimensions.append({
+                'hostname': task.hostname,
+                'task': task.name,
+            })
+        dimensions.append({
             'task': task.name,
-        }
-        cloudwatch.put_metric_data(CLOUDWATCH_NAMESPACE, task.type, 1,
-                                   datetime.fromtimestamp(task.timestamp), 'Count', dimensions)
+        })
+        for dimensions_metric in dimensions:
+            cloudwatch.put_metric_data(
+                CLOUDWATCH_NAMESPACE, task.type, 1,
+                datetime.fromtimestamp(task.timestamp),
+                'Count', dimensions_metric)
 
     with app.connection() as connection:
         recv = app.events.Receiver(connection, handlers={
