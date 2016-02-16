@@ -1,0 +1,12 @@
+FROM python:2.7
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+ADD requirements.txt /usr/src/app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+ADD main.py /usr/src/app/
+ADD monitor.py /usr/src/app/
+
+CMD ["python", "monitor.py"]
