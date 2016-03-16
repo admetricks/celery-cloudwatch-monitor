@@ -32,11 +32,14 @@ def monitor(app):
         dimensions.append({
             'task': task.name,
         })
-        dtime = datetime.fromtimestamp(task.runtime)
+        runtime = task.runtime * 1000
+        print('on_task_succeeded task.runtime', task.runtime)
+        print('on_task_succeeded runtime', runtime)
+
         for dimensions_metric in dimensions:
             cloudwatch.put_metric_data(
                 CLOUDWATCH_NAMESPACE, task.type,
-                (dtime.second * 1000) + (dtime.microsecond / 1000),
+                runtime,
                 datetime.fromtimestamp(task.timestamp),
                 'Milliseconds', dimensions_metric)
 
