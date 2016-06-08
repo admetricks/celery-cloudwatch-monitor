@@ -19,7 +19,6 @@ def monitor(app):
         return state.tasks.get(event['uuid'])
 
     def on_task_succeeded(event):
-        print('on_task_succeeded', event)
         task = get_task(event)
         if task.name is None:
             return
@@ -33,8 +32,6 @@ def monitor(app):
             'task': task.name,
         })
         runtime = task.runtime * 1000
-        print('on_task_succeeded task.runtime', task.runtime)
-        print('on_task_succeeded runtime', runtime)
 
         for dimensions_metric in dimensions:
             cloudwatch.put_metric_data(
@@ -44,7 +41,6 @@ def monitor(app):
                 'Milliseconds', dimensions_metric)
 
     def on_task_received(event):
-        print('on_task_received', event)
         task = get_task(event)
         if task.name is None:
             return
@@ -64,7 +60,6 @@ def monitor(app):
                 'Count', dimensions_metric)
 
     def on_task_started(event):
-        print('on_task_started', event)
         task = get_task(event)
         if task.name is None:
             return
@@ -84,7 +79,6 @@ def monitor(app):
                 'Count', dimensions_metric)
 
     def on_task_failed(event):
-        print('on_task_failed', event)
         task = get_task(event)
         if task.name is None:
             return
